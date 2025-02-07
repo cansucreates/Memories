@@ -1,19 +1,16 @@
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 10.0f;
+    public float moveSpeed = 5f;
 
-
-    // Update is called once per frame
     void Update()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        // Get input for movement
+        float moveX = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+        float moveZ = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
 
-        transform.Translate(Vector3.right * speed * horizontalInput * Time.deltaTime);
-        transform.Translate(Vector3.forward * speed * verticalInput * Time.deltaTime);
-
-        
+        // Move the player
+        transform.Translate(moveX, 0, moveZ);
     }
 }
