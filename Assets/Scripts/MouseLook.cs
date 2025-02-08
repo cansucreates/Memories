@@ -9,8 +9,8 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
-        // Hide and lock the cursor to the center of the screen
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Locked; // Lock cursor to the center
+        Cursor.visible = true;
     }
 
     void Update()
