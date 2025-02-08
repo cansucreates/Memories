@@ -1,49 +1,77 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI; 
 
 public class ItemInteraction : MonoBehaviour
 {
-    public float interactionDistance = 10f; // How far the player can interact
-    public TextMeshProUGUI interactionText; // Reference to the TextMeshPro UI text element
+    public float interactionDistance = 10f; // Interaction range
+    public TextMeshProUGUI interactionText; // UI text for item description
+    public Image itemImage; // UI Image for displaying item
+    public GameObject interactionPanel; // UI Panel
 
     void Start()
     {
-        // Hide the text initially
-        if (interactionText != null)
+        if (interactionPanel != null)
         {
-            interactionText.gameObject.SetActive(false);
+            interactionPanel.SetActive(false); // UI is hidden at the start
         }
     }
 
     void Update()
     {
-        // Check for left mouse click
-        if (Input.GetMouseButtonDown(0)) // Left mouse button
+        if (Input.GetMouseButtonDown(0)) // Left click
         {
-            // Create a ray from the mouse position
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            // Perform the raycast
             if (Physics.Raycast(ray, out hit, interactionDistance))
             {
-                // Check if the object is interactable
                 if (hit.collider.CompareTag("Interactable"))
                 {
-                    // Get the InteractableItem component
                     InteractableItem item = hit.collider.GetComponent<InteractableItem>();
 
                     if (item != null)
                     {
-                        // Display the text from the InteractableItem component
+                        // Set text
                         if (interactionText != null)
                         {
                             interactionText.text = item.interactionText;
-                            interactionText.gameObject.SetActive(true);
                         }
+
+                        // Set image
+                        if (itemImage != null && item.itemSprite != null)
+                        {
+                            itemImage.sprite = item.itemSprite; // Assign the sprite
+                        }
+
+                        // Show the UI Panel
+                        if (interactionPanel != null)
+                        {
+                            interactionPanel.SetActive(true);
+                        }
+
+                        // Pause the game
+                        Time.timeScale = 0f;
                     }
                 }
             }
         }
+
+        // Close UI with Escape key
+        if (Input.GetKeyDown(KeyCode.Escape) && interactionPanel.activeSelf)
+        {
+            CloseInteraction();
+        }
+    }
+
+    public void CloseInteraction()
+    {
+        if (interactionPanel != null)
+        {
+            interactionPanel.SetActive(false);
+        }
+
+        // Resume the game
+        Time.timeScale = 1f;
     }
 }

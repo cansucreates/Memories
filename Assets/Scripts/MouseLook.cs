@@ -2,31 +2,41 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
-    public float mouseSensitivity = 100f; // Speed of rotation
+    public float mouseSensitivity = 50f; // Speed of rotation
     public Transform playerBody; // Reference to the player's body (for horizontal rotation)
 
     private float xRotation = 0f; // Tracks vertical rotation (for looking up/down)
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked; // Lock cursor to the center
-        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined; // Keep the cursor inside the game window
+        Cursor.visible = true; // Keep cursor visible
     }
 
     void Update()
     {
-        // Get mouse input
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        if (Input.GetMouseButton(1)) // Right mouse button is held
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-        // Rotate the player left/right (around the Y-axis)
-        playerBody.Rotate(Vector3.up * mouseX);
+            // Get raw mouse input for more accurate movement
+            float mouseX = Input.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
+            float mouseY = Input.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Rotate the camera up/down (around the X-axis)
-        xRotation -= mouseY; // Subtract to invert the vertical rotation
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Limit vertical rotation to 90 degrees up/down
+            // Rotate the player left/right (Y-axis)
+            playerBody.Rotate(Vector3.up * mouseX);
 
-        // Apply the rotation to the camera
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            // Rotate the camera up/down (X-axis)
+            xRotation -= mouseY;
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+            transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None; // Unlock cursor when not right-clicking
+            Cursor.visible = true;
+        }
     }
 }
