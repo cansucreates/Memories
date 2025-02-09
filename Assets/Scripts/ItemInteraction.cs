@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
+using System.Collections;
 
 public class ItemInteraction : MonoBehaviour
 {
@@ -8,6 +9,11 @@ public class ItemInteraction : MonoBehaviour
     public TextMeshProUGUI interactionText; // UI text for item description
     public Image itemImage; // UI Image for displaying item
     public GameObject interactionPanel; // UI Panel
+    public float typingSpeed = 0.05f; // Speed of typing effect
+
+    private string fullText = ""; // Stores the full text
+    private bool isTyping = false; // Tracks if typing is in progress
+    private Coroutine typingCoroutine; // Stores the coroutine for stopping
 
     void Start()
     {
@@ -32,26 +38,7 @@ public class ItemInteraction : MonoBehaviour
 
                     if (item != null)
                     {
-                        // Set text
-                        if (interactionText != null)
-                        {
-                            interactionText.text = item.interactionText;
-                        }
-
-                        // Set image
-                        if (itemImage != null && item.itemSprite != null)
-                        {
-                            itemImage.sprite = item.itemSprite; // Assign the sprite
-                        }
-
-                        // Show the UI Panel
-                        if (interactionPanel != null)
-                        {
-                            interactionPanel.SetActive(true);
-                        }
-
-                        // Pause the game
-                        Time.timeScale = 0f;
+                        ShowItemInteraction(item);
                     }
                 }
             }
@@ -64,7 +51,48 @@ public class ItemInteraction : MonoBehaviour
         }
     }
 
-    public void CloseInteraction()
+    void ShowItemInteraction(InteractableItem item)
+    {
+        // Set image
+        if (itemImage != null && item.itemSprite != null)
+        {
+            itemImage.sprite = item.itemSprite;
+        }
+
+        // Show the UI Panel
+        if (interactionPanel != null)
+        {
+            interactionPanel.SetActive(true);
+        }
+
+        // Start Typing Effect
+        if (interactionText != null)
+        {
+            if (typingCoroutine != null)
+            {
+                StopCoroutine(typingCoroutine);
+            }
+            fullText = item.interactionText;
+            interactionText.text = ""; // Clear previous text
+            typingCoroutine = StartCoroutine(TypeText());
+        }
+
+        // Pause the game
+        Time.timeScale = 0f;
+    }
+
+    IEnumerator TypeText()
+    {
+        isTyping = true;
+        foreach (char letter in fullText.ToCharArray())
+        {
+            interactionText.text += letter;
+            yield return new WaitForSecondsRealtime(typingSpeed); // Use Realtime since Time.timeScale = 0
+        }
+        isTyping = false;
+    }
+
+    void CloseInteraction()
     {
         if (interactionPanel != null)
         {
@@ -73,5 +101,16 @@ public class ItemInteraction : MonoBehaviour
 
         // Resume the game
         Time.timeScale = 1f;
+    }
+
+    // Skipping Typing Effect if player clicks while typing
+    public void SkipTyping()
+    {
+        if (isTyping)
+        {
+            StopCoroutine(typingCoroutine);
+            interactionText.text = fullText; // Instantly show full text
+            isTyping = false;
+        }
     }
 }

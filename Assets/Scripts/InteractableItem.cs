@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class InteractableItem : MonoBehaviour
 {
-    public string interactionText = "This is a book memory"; // Description of the item
-    public Sprite itemSprite; // Assign a UI-friendly image in the Inspector
+    public string interactionText = ""; // Description of the item
+    public Sprite itemSprite; // Icon to display in the UI
+    public string itemName = "Foto"; // Name of the item
 }
