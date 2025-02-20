@@ -22,30 +22,31 @@ public class PlayerInteraction : MonoBehaviour
             pickupPrompt.gameObject.SetActive(false);
     }
 
-    void Update()
+ void Update()
+{
+    if (Input.GetMouseButtonDown(0))
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, interactionDistance))
+        if (Physics.Raycast(ray, out hit, interactionDistance))
+        {
+            if (hit.collider.CompareTag("Interactable"))
             {
-                if (hit.collider.CompareTag("Interactable"))
-                {
-                    InteractableItem item = hit.collider.GetComponent<InteractableItem>();
-                    if (item != null)
-                        ShowItemInteraction(item);
-                }
+                InteractableItem item = hit.collider.GetComponent<InteractableItem>();
+                if (item != null)
+                    ShowItemInteraction(item);
             }
         }
-
-        if (canPickUp && Input.GetKeyDown(KeyCode.E))
-            PickUpItem();
-
-        if (Input.GetKeyDown(KeyCode.Escape) && interactionPanel.activeSelf)
-            CloseInteraction();
     }
+
+    if (canPickUp && Input.GetKeyDown(KeyCode.E))
+        PickUpItem();
+
+    if (Input.GetKeyDown(KeyCode.Escape) && interactionPanel.activeSelf)
+        CloseInteraction();
+}
+
 
     void ShowItemInteraction(InteractableItem item)
     {
@@ -70,7 +71,10 @@ public class PlayerInteraction : MonoBehaviour
     void PickUpItem()
     {
         if (currentItem != null)
+        {
             currentItem.gameObject.SetActive(false);
+            GameManager.Instance.CollectItem(); // Notify GameManager when an item is picked up
+        }
 
         if (interactionPanel != null)
             interactionPanel.SetActive(false);
@@ -95,4 +99,6 @@ public class PlayerInteraction : MonoBehaviour
         currentItem = null;
         canPickUp = false;
     }
+
+
 }

@@ -4,10 +4,11 @@ using System.Collections;
 
 public class IntroTextManager : MonoBehaviour
 {
-    public TextMeshProUGUI introText; // UI Text
-    public float typingSpeed = 0.05f;  // Speed of typing effect
-    public float sentenceDelay = 2f;   // Delay before showing the next sentence
-    public float fadeDuration = 1f;    // Fade-out duration
+    public TextMeshProUGUI introText;
+    public GameObject startMenu;
+    public float typingSpeed = 0.05f;
+    public float sentenceDelay = 2f;
+    public float fadeDuration = 1f;
 
     private string[] sentences = new string[]
     {
@@ -19,41 +20,48 @@ public class IntroTextManager : MonoBehaviour
 
     private int currentSentenceIndex = 0;
     private bool isTyping = false;
+    private Coroutine typingCoroutine; // Store the currently running coroutine
 
     void Start()
     {
-        if (introText != null)
-        {
-            introText.text = ""; // Start with empty text
-            StartCoroutine(TypeSentence(sentences[currentSentenceIndex])); // Start typing
-        }
+        introText.gameObject.SetActive(false);
     }
 
-void Update()
-{
-    if (Input.GetMouseButtonDown(0))
+    public void StartIntroText()
     {
-        if (isTyping)
+        startMenu.SetActive(false);
+        introText.gameObject.SetActive(true);
+        introText.text = "";
+        currentSentenceIndex = 0;
+
+        // Stop any previous coroutine before starting a new one
+        if (typingCoroutine != null)
+            StopCoroutine(typingCoroutine);
+
+        typingCoroutine = StartCoroutine(TypeSentence(sentences[currentSentenceIndex]));
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && introText.gameObject.activeSelf)
         {
-            // Skip typing effect and show full sentence immediately
-            StopAllCoroutines();
-            introText.text = sentences[currentSentenceIndex]; 
-            isTyping = false;
-        }
-        else
-        {
-            // If typing is finished, move to the next sentence
-            NextSentence();
+            if (isTyping)
+            {
+                StopCoroutine(typingCoroutine);
+                introText.text = sentences[currentSentenceIndex];
+                isTyping = false;
+            }
+            else
+            {
+                NextSentence();
+            }
         }
     }
-}
-
-
 
     IEnumerator TypeSentence(string sentence)
     {
         isTyping = true;
-        introText.text = ""; // Clear text
+        introText.text = "";
 
         foreach (char letter in sentence)
         {
@@ -62,21 +70,25 @@ void Update()
         }
 
         isTyping = false;
-        yield return new WaitForSeconds(sentenceDelay); // Wait before showing next sentence
-
-        NextSentence(); // Auto-advance to next sentence
+        yield return new WaitForSeconds(sentenceDelay);
+        NextSentence();
     }
 
     void NextSentence()
     {
-        if (currentSentenceIndex < sentences.Length - 1) // If more sentences remain
+        if (currentSentenceIndex < sentences.Length - 1)
         {
             currentSentenceIndex++;
-            StartCoroutine(TypeSentence(sentences[currentSentenceIndex])); // Start typing next
+
+            // Stop any existing coroutine before starting a new one
+            if (typingCoroutine != null)
+                StopCoroutine(typingCoroutine);
+
+            typingCoroutine = StartCoroutine(TypeSentence(sentences[currentSentenceIndex]));
         }
         else
         {
-            StartCoroutine(FadeOutText()); // If last sentence, fade out text
+            StartCoroutine(FadeOutText());
         }
     }
 
@@ -93,6 +105,6 @@ void Update()
             yield return null;
         }
 
-        introText.gameObject.SetActive(false); // Hide text after fade-out
+        introText.gameObject.SetActive(false);
     }
 }
